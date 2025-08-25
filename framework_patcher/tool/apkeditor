@@ -1,6 +1,0 @@
-#!/bin/bash
-jarfile=/usr/bin/share/android-apkeditor/APKEditor.jar
-
-javaOpts="-Xmx1024M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
-
-exec java $javaOpts -jar "$jarfile" "$@"
