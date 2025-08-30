@@ -77,8 +77,9 @@ sudo zypper install -y java-latest-openjdk android-tools zip unzip
 ---
 
 ## Notes
+- framework.jar patch script is only for Linux x86_64. Android is not supported.
 - This implementation will be updated whenever Google changes Play Integrity.  
-- `PIF.apk` is updated in the cloud if keys/properties get banned.
+- `PIF.apk` is updated if keys/properties get banned, just run `pif-updater`.
 - Some of those Implementation Features is adjusted via PIF.apk bools/strings, so no need to worry about that.. i'll only enable and disable whats important for passing play integrity.
 - On devices running **SELinux Enforcing**, you may need to add rules to address denials related to this patch and the `pif-updater`.  
 
