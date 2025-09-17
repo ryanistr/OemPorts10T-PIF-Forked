@@ -9,13 +9,13 @@ Original by Danda420
 - **GMS & Vending Properties Spoof**  
   Patches system properties to match certified devices for GMS & Vending.
 - **Spoof Provider**  
-  Spoofs AndroidKeystoreSpi.
+  Spoofs AndroidKeystoreSpi. (When keybox is revoked as a backup option)
 - **Security Patch Spoof**  
   Spoofs Security Patch so that it passes strong integrity.
 - **Vending SDK 32 Spoof**  
   Just incase. (this wont get enabled usually)
 - **PIF.apk Updater**  
-  Automatically fetches updated PIF.apk from the cloud. (note This pif fork is detached from danda's PIF.apk server
+  Automatically fetches updated PIF.apk from the cloud. (This pif fork is detached from danda's PIF.apk server)
 
 ---
 
