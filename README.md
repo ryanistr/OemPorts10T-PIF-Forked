@@ -1,6 +1,7 @@
-# Framework Play Integrity Fix (PIF)
+# Framework Play Integrity Fix (PIF) Forked to Fix cannot Find curl binary
 
-framework-level implementation to pass Play Integrity checks on Android ROMs.
+framework-level implementation to pass Play Integrity checks on Android ROMs. 
+Original by Danda420
 
 ## Features
 - **Bootloader Spoof**  
