@@ -2,8 +2,6 @@
 
 framework-level implementation to pass Play Integrity checks on Android ROMs. 
 Original by Danda420
-# Note
-This pif fork is detached from danda's PIF.apk server
 
 ## Features
 - **Bootloader Spoof**  
@@ -17,7 +15,7 @@ This pif fork is detached from danda's PIF.apk server
 - **Vending SDK 32 Spoof**  
   Just incase. (this wont get enabled usually)
 - **PIF.apk Updater**  
-  Automatically fetches updated PIF.apk from the cloud.
+  Automatically fetches updated PIF.apk from the cloud. (note This pif fork is detached from danda's PIF.apk server
 
 ---
 
