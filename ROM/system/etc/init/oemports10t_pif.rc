@@ -5,6 +5,8 @@
 service pif_auto_updater /system/bin/pif-updater
     class main
     seclabel u:r:init:s0
+	user root
+	group root system
     disabled
     oneshot
 
