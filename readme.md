@@ -12,6 +12,6 @@ TYPE=user
 TAGS=release-keys
 FINGERPRINT=google/panther_beta/panther:Baklava/BP41.250725.006/13939570:user/release-keys
 SECURITY_PATCH=2025-08-05
-KeyboxStatus=Revoked
+KeyboxStatus=Valid
 SpoofProvider=true
 VendingSDK32Spoof=false
