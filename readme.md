@@ -1,17 +1,17 @@
 # PIF Updater Info
-PRODUCT=panther_beta
-MODEL=Pixel 7
-DEVICE=panther
+PRODUCT=felix_beta
+MODEL=Pixel Fold
+DEVICE=felix
 MANUFACTURER=Google
 BRAND=google
-RELEASE=Baklava
-SDK=35
-ID=BP41.250725.006
-INCREMENTAL=13939570
+RELEASE=16
+SDK=36
+ID=BP41.250822.010
+INCREMENTAL=14082742
 TYPE=user
 TAGS=release-keys
-FINGERPRINT=google/panther_beta/panther:Baklava/BP41.250725.006/13939570:user/release-keys
-SECURITY_PATCH=2025-08-05
+FINGERPRINT=google/felix_beta/felix:16/BP41.250822.010/14082742:user/release-keys
+SECURITY_PATCH=2025-09-05
 KeyboxStatus=Valid
-SpoofProvider=true
+SpoofProvider=false
 VendingSDK32Spoof=false
