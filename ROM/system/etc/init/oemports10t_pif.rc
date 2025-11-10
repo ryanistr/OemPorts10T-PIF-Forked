@@ -1,10 +1,9 @@
 # will fetch new pif apk if connected to internet
 # if pif.apk version from server is same as the last fetched then it wont get updated
 
-# Use seclabeled service instead so it runs without root and su
+# Use make pif updater as a oneshot service instead since we added its own sepolicy domains
 service pif_auto_updater /system/bin/pif-updater
     class main
-    seclabel u:r:init:s0
 	user root
 	group root system
     disabled
@@ -12,3 +11,7 @@ service pif_auto_updater /system/bin/pif-updater
 
 on property:sys.boot_completed=1 && property:persist.sys.oemports10t.pif.autoupdate=true
     start pif_auto_updater
+
+# Use seclabeled su if ur lazy to do sepolicy
+# on property:sys.boot_completed=1 && property:persist.sys.oemports10t.pif.autoupdate=true
+#    exec_background u:r:su:s0 root shell -- /system/bin/pif-updater
