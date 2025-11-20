@@ -16,4 +16,4 @@ KeyboxStatus=Valid
 SpoofProvider=false
 VendingSDK32Spoof=false
 
-PIF Version V.2025.11.19
+PIF Version V.2025.11.20
