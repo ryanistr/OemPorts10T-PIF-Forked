@@ -17,3 +17,4 @@ SpoofProvider=false
 VendingSDK32Spoof=false
 
 PIF Version V.2025.11.20
+im lazy to update the info, its updated btw. enjoy
