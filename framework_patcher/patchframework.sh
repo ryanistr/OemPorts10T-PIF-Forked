@@ -3,14 +3,13 @@
 dirnow=$PWD
 
 if [[ ! -f $dirnow/framework.jar ]]; then
-   echo "no framework.jar detected!"
+   echo "❌ ERROR: no framework.jar detected!"
    exit 1
 fi
 
 apkeditor() {
     jarfile=$dirnow/tool/APKEditor.jar
     javaOpts="-Xmx4096M -Dfile.encoding=utf-8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true"
-
     java $javaOpts -jar "$jarfile" "$@"
 }
 
@@ -44,12 +43,11 @@ expressions_fix() {
 	echo $escaped_var
 }
 
-
-echo "unpacking framework.jar"
+echo "📦 unpacking framework.jar..."
 apkeditor d -i framework.jar -o frmwrk > /dev/null 2>&1
 mv framework.jar frmwrk.jar
 
-echo "patching framework.jar"
+echo "🪛 patching framework.jar..."
 
 keystorespiclassfile=$(find frmwrk/ -name 'AndroidKeyStoreSpi.smali' -printf '%P\n')
 utilfolder=$(find frmwrk/ -name "util" -type d -printf '%P\n' | grep com/android/internal/util | tail -n 1)
@@ -98,7 +96,7 @@ rm -rf inst1
 rm -rf inst2
 rm -rf tmp_keystore
 
-echo "repacking framework.jar classes"
+echo "🔄 repacking framework.jar classes..."
 
 apkeditor b -i frmwrk > /dev/null 2>&1
 unzip frmwrk_out.apk 'classes*.dex' -d frmwrk > /dev/null 2>&1
@@ -108,9 +106,13 @@ patchclass=$(expr $(find frmwrk/ -type f -name '*.dex' | wc -l) + 1)
 cp PIF/classes.dex frmwrk/classes${patchclass}.dex
 
 cd frmwrk
-echo "zipping class"
+echo "🔖 zipping class with timestamp 07302003..."
 zip -qr0 -t 07302003 $dirnow/frmwrk.jar classes*
 cd $dirnow
-echo "zipaligning framework.jar"
+
+echo "⚡ zipaligning framework.jar..."
 zipalign -v 4 frmwrk.jar framework.jar > /dev/null
+
 rm -rf frmwrk.jar frmwrk frmwrk_out.apk
+
+echo "✅ SUCCESS: framework.jar patched and aligned."
