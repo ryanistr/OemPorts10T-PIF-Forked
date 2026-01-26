@@ -40,7 +40,7 @@ sudo yum install -y java-17-openjdk android-tools zip unzip
 
 #### Debian / Ubuntu / Linux Mint
 ```sh
-sudo apt-get update && sudo apt-get install -y openjdk-17-jre android-sdk-libsparse-utils android-sdk-platform-tools zip unzip
+sudo apt-get update && sudo apt-get install -y openjdk-17-jre android-sdk-libsparse-utils android-sdk-build-tools zip unzip
 ```
 
 #### openSUSE / SLES
