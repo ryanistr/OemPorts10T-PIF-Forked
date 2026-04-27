@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 6 Pro
-FINGERPRINT       : google/raven_beta/raven:16/CP11.251209.009/14837756:user/release-keys
+MODEL 	          : Pixel 6a
+FINGERPRINT       : google/panther_beta/panther:16/CP11.251209.009/14837756:user/release-keys
 BRAND             : google
-PRODUCT           : raven_beta
-DEVICE            : raven
+PRODUCT           : panther_beta
+DEVICE            : panther
 RELEASE           : 16
 ID                : CP11.251209.009
 INCREMENTAL       : 14837756
