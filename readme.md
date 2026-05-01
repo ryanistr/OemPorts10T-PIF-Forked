@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel Tablet
-FINGERPRINT       : google/tangorpro_beta/tangorpro:CANARY/ZP11.260320.008/15205769:user/release-keys
+MODEL 	          : Pixel Fold
+FINGERPRINT       : google/felix_beta/felix:CANARY/ZP11.260320.007/15154667:user/release-keys
 BRAND             : google
-PRODUCT           : tangorpro_beta
-DEVICE            : tangorpro
+PRODUCT           : felix_beta
+DEVICE            : felix
 RELEASE           : 
 ID                : 
 INCREMENTAL       : 
