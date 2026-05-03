@@ -1,0 +1,10 @@
+{
+  "MANUFACTURER": "Google",
+  "BRAND": "google",
+  "DEVICE": "felix",
+  "PRODUCT": "felix_beta",
+  "MODEL": "Pixel Fold",
+  "FINGERPRINT": "google/felix_beta/felix:CANARY/ZP11.260320.007/15154667:user/release-keys",
+  "SECURITY_PATCH": "2026-04-05",
+  "FIRST_API_LEVEL": "31"
+}
