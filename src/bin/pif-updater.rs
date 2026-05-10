@@ -1,24 +1,13 @@
 use std::env;
 use std::fs;
 use std::io::Write;
-use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::{ Command, Stdio };
 use std::thread::sleep;
 use std::time::Duration;
 
-const PIF_APK: &str = "/data/system/PIF.apk";
-const PIF_INFO_TMP: &str = "/data/system/pif_info_tmp";
-const PIF_INFO: &str = "/data/pif_info";
-const OEM_DIR: &str = "/data/local/oemports10t";
-
-fn run(cmd: &str, args: &[&str]) -> String {
-    let output = Command::new(cmd)
-        .args(args)
-        .output()
-        .unwrap_or_else(|_| panic!("failed to run command {}", cmd));
-    String::from_utf8_lossy(&output.stdout).to_string()
-}
+const PIF_TMP: &str = "/data/system/pif_tmp.apk";
+const PIF_APK: &str = "/data/PIF.apk";
 
 fn silent_kill(process: &str) {
     let _ = Command::new("killall")
@@ -28,183 +17,126 @@ fn silent_kill(process: &str) {
         .status();
 }
 
-fn curl_details() {
-    let _ = run(
-        "curl",
-        &[
-            "-s",
-            "https://raw.githubusercontent.com/Danda420/OemPorts10T-PIF/pif-apk/info.txt",
-            "-o",
-            PIF_INFO_TMP,
-        ],
-    );
-    sleep(Duration::from_secs(1));
-    retry_details_if_fail();
-}
+fn rin_pif() {
+    let url = "https://raw.githubusercontent.com/ryanistr/OemPorts10T-PIF-Forked/refs/heads/pif-apk/PIF.apk";
 
-fn retry_details_if_fail() {
-    if let Ok(metadata) = fs::metadata(PIF_INFO_TMP) {
-        if metadata.len() < 100 {
-            println!("Failed retrieving PIF Info, retrying...");
-            curl_details();
+    let status = Command::new("rin")
+        .args(
+            &[
+                "-k",
+                "-s",
+                "-4",
+                "--resolve",
+                "raw.githubusercontent.com:443:185.199.108.133",
+                url,
+                "-o",
+                PIF_TMP,
+            ]
+        )
+        .status();
+
+    let mut success = false;
+    if let Ok(st) = status {
+        if st.success() {
+            if let Ok(metadata) = fs::metadata(PIF_TMP) {
+                if metadata.len() >= 1000 {
+                    success = true;
+                }
+            }
         }
-    } else {
-        println!("Failed retrieving PIF Info, retrying...");
-        curl_details();
+    }
+
+    sleep(Duration::from_secs(1));
+    if !success {
+        retry_pif_if_fail();
     }
 }
 
-fn fetch_info() {
+fn retry_pif_if_fail() {
+    if let Ok(metadata) = fs::metadata(PIF_TMP) {
+        if metadata.len() < 1000 {
+            println!("Failed retrieving PIF.apk, retrying...");
+            rin_pif();
+        }
+    } else {
+        println!("Download failed, retrying...");
+        rin_pif();
+    }
+}
+
+fn fetch_pif() {
     loop {
         println!("Checking internet connection...");
-
-        let mut child = Command::new("nc")
-            .args(&["google.com", "80"])
+        let mut child = Command::new("/vendor/bin/nc")
+            .args(&["1.1.1.1", "80"])
             .stdin(Stdio::piped())
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
             .expect("failed to spawn nc");
-
         if let Some(mut stdin) = child.stdin.take() {
-            let _ = stdin.write_all(b"GET http://google.com HTTP/1.0\n\n");
+            let _ = stdin.write_all(b"GET http://1.1.1.1 HTTP/1.0\n\n");
         }
-
         if let Ok(status) = child.wait() {
             if status.success() {
-                println!("Connected to internet, fetching PIF Info!");
-                curl_details();
+                println!("Connected to internet, fetching latest PIF.apk!");
+                rin_pif();
                 break;
             }
         }
-
         sleep(Duration::from_secs(2));
     }
 }
 
-fn curl_pif() {
-    let _ = run(
-        "curl",
-        &[
-            "-s",
-            "https://raw.githubusercontent.com/Danda420/OemPorts10T-PIF/pif-apk/PIF.apk",
-            "-o",
-            PIF_APK,
-        ],
-    );
-    sleep(Duration::from_secs(1));
-    retry_pif_if_fail();
-}
-
-fn retry_pif_if_fail() {
-    if let Ok(metadata) = fs::metadata(PIF_APK) {
-        if metadata.len() < 1000 {
-            println!("Failed retrieving PIF.apk, retrying...");
-            curl_pif();
-        }
-    } else {
-        println!("Download failed, retrying...");
-        curl_pif();
-    }
-}
-
-fn hellyeah_dir() {
-    if !Path::new(OEM_DIR).exists() {
-        let _ = fs::create_dir_all(OEM_DIR);
-        let _ = fs::set_permissions(OEM_DIR, fs::Permissions::from_mode(0o777));
-        let _ = Command::new("chown").args(&["root:root", OEM_DIR]).status();
-    }
-}
-
-fn push_pif_json(path: &str) {
-    hellyeah_dir();
-    let dest = format!("{}/pif.json", OEM_DIR);
-    let _ = fs::copy(path, &dest);
-    let _ = fs::set_permissions(&dest, fs::Permissions::from_mode(0o777));
-    let _ = Command::new("chown").args(&["root:root", &dest]).status();
-    silent_kill("com.google.android.gms.unstable");
-}
-
-fn push_keybox_xml(path: &str) {
-    hellyeah_dir();
-    let dest = format!("{}/keybox.xml", OEM_DIR);
-    let _ = fs::copy(path, &dest);
-    let _ = fs::set_permissions(&dest, fs::Permissions::from_mode(0o777));
-    let _ = Command::new("chown").args(&["root:root", &dest]).status();
-    silent_kill("com.android.vending");
-}
-
 fn md5sum(path: &str) -> Option<String> {
-    let output = Command::new("md5sum").arg(path).output().ok()?;
+    let output = Command::new("/vendor/bin/md5sum").arg(path).output().ok()?;
     let text = String::from_utf8_lossy(&output.stdout);
     Some(text.split_whitespace().next()?.to_string())
 }
 
 fn main_logic() {
-    fetch_info();
+    fetch_pif();
+    let pif_tmp_md5 = md5sum(PIF_TMP);
+    let pif_md5 = md5sum(PIF_APK);
 
-    let pif_info_tmp_md5 = md5sum(PIF_INFO_TMP);
-    let pif_info_md5 = md5sum(PIF_INFO);
-
-    println!("+------------------------------+");
-    println!("|         PIF.apk INFO         |");
-    println!("+------------------------------+");
-    if let Ok(info_content) = fs::read_to_string(PIF_INFO_TMP) {
-        print!("{}", info_content);
-    }
-    println!("--------------------------------");
-
-    if pif_info_tmp_md5 != pif_info_md5 {
-        println!("New Version Found! Downloading...");
-        curl_pif();
-        let _ = fs::copy(PIF_INFO_TMP, PIF_INFO);
-        println!("Installing latest PIF.apk");
-        
+    if pif_tmp_md5 != pif_md5 && pif_tmp_md5.is_some() {
+        println!("New Version Found! Installing latest PIF.apk");
+        let _ = fs::copy(PIF_TMP, PIF_APK);
         let _ = Command::new("pm").args(&["install", PIF_APK]).status();
         silent_kill("com.google.android.gms.unstable");
-        silent_kill("com.android.vending");
-        let _ = Command::new("pkill").arg("systemui").status();
         println!("PIF.apk updated!");
     } else {
         println!("Your PIF.apk version is already the latest one!");
     }
 
-    if Path::new(PIF_INFO_TMP).exists() {
-        let _ = fs::remove_file(PIF_INFO_TMP);
+    if Path::new(PIF_TMP).exists() {
+        let _ = fs::remove_file(PIF_TMP);
     }
-    if Path::new(PIF_APK).exists() {
-        let _ = fs::remove_file(PIF_APK);
+
+    if !Path::new("/system/bin/pif-updater").exists() {
+        let _ = Command::new("mount").args(&["-o", "remount,rw", "/"]).status();
+        let _ = Command::new("ln")
+            .args(&["-s", "/vendor/bin/oemports10t_PIF-updater", "/system/bin/pif-updater"])
+            .status();
+        let _ = Command::new("mount").args(&["-o", "remount,ro", "/"]).status();
     }
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-
     if args.len() > 1 {
         let mut i = 1;
         let mut executed_flag = false;
-        
+
         while i < args.len() {
-            match args[i].as_str() {
-                "-p" => {
-                    if i + 1 < args.len() {
-                        push_pif_json(&args[i + 1]);
-                        executed_flag = true;
-                        i += 1;
-                    }
-                }
-                "-k" => {
-                    if i + 1 < args.len() {
-                        push_keybox_xml(&args[i + 1]);
-                        executed_flag = true;
-                        i += 1;
-                    }
-                }
-                _ => {}
+            if args[i] == "-p" {
+                silent_kill("com.android.vending");
+                silent_kill("com.google.android.gms.unstable");
+                executed_flag = true;
             }
             i += 1;
         }
-        
+
         if !executed_flag {
             main_logic();
         }
