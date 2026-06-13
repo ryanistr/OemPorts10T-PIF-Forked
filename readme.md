@@ -1,17 +1,17 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 8 Pro
-FINGERPRINT       : google/husky_beta/husky:CANARY/ZP11.260417.009/15372612:user/release-keys
+MODEL 	          : Pixel Tablet
+FINGERPRINT       : google/tangorpro_beta/tangorpro:CANARY/ZP11.260515.009/15513807:user/release-keys
 BRAND             : google
-PRODUCT           : husky_beta
-DEVICE            : husky
+PRODUCT           : tangorpro_beta
+DEVICE            : tangorpro
 RELEASE           : 
 ID                : 
 INCREMENTAL       : 
 TYPE              : 
 TAGS              : 
-SECURITY PATCH    : 2026-05-05
+SECURITY PATCH    : 2026-06-05
 FIRST API LEVEL   : 31
 SPOOF PROVIDER    : true
 SPOOF VENDING SDK : false
