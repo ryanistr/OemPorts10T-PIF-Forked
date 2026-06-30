@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 9 Pro XL
-FINGERPRINT       : google/komodo_beta/komodo:CANARY/ZP11.260515.009/15513807:user/release-keys
+MODEL 	          : Pixel 6
+FINGERPRINT       : google/oriole_beta/oriole:CANARY/ZP11.260515.009/15513807:user/release-keys
 BRAND             : google
-PRODUCT           : komodo_beta
-DEVICE            : komodo
+PRODUCT           : oriole_beta
+DEVICE            : oriole
 RELEASE           : 
 ID                : 
 INCREMENTAL       : 
