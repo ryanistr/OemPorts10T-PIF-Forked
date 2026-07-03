@@ -112,14 +112,6 @@ fn main_logic() {
     if Path::new(PIF_TMP).exists() {
         let _ = fs::remove_file(PIF_TMP);
     }
-
-    if !Path::new("/system/bin/pif-updater").exists() {
-        let _ = Command::new("mount").args(&["-o", "remount,rw", "/"]).status();
-        let _ = Command::new("ln")
-            .args(&["-s", "/vendor/bin/oemports10t_PIF-updater", "/system/bin/pif-updater"])
-            .status();
-        let _ = Command::new("mount").args(&["-o", "remount,ro", "/"]).status();
-    }
 }
 
 fn main() {
