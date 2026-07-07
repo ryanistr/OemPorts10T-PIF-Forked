@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 6
-FINGERPRINT       : google/oriole_beta/oriole:CANARY/ZP11.260515.009/15513807:user/release-keys
+MODEL 	          : Pixel Fold
+FINGERPRINT       : google/felix_beta/felix:CANARY/ZP11.260515.009/15513807:user/release-keys
 BRAND             : google
-PRODUCT           : oriole_beta
-DEVICE            : oriole
+PRODUCT           : felix_beta
+DEVICE            : felix
 RELEASE           : 
 ID                : 
 INCREMENTAL       : 
