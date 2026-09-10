@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 9a
-FINGERPRINT       : google/tegu_beta/tegu:CANARY/ZP11.260717.006/16004061:user/release-keys
+MODEL 	          : Pixel 6 Pro
+FINGERPRINT       : google/raven_beta/raven:CANARY/ZP11.260717.006/16004061:user/release-keys
 BRAND             : google
-PRODUCT           : tegu_beta
-DEVICE            : tegu
+PRODUCT           : raven_beta
+DEVICE            : raven
 RELEASE           : 
 ID                : 
 INCREMENTAL       : 
