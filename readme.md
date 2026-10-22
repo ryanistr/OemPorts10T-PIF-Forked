@@ -13,6 +13,6 @@ TYPE              :
 TAGS              : 
 SECURITY PATCH    : 2026-10-05
 FIRST API LEVEL   : 31
-SPOOF PROVIDER    : true
+SPOOF PROVIDER    : false
 SPOOF VENDING SDK : false
 ```
