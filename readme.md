@@ -6,13 +6,13 @@ FINGERPRINT       : google/bluejay_beta/bluejay:CANARY/ZP11.260918.007/16484274:
 BRAND             : google
 PRODUCT           : bluejay_beta
 DEVICE            : bluejay
-RELEASE           : 
-ID                : 
-INCREMENTAL       : 
-TYPE              : 
-TAGS              : 
+RELEASE           : CANARY
+ID                : ZP11.260918.007
+INCREMENTAL       : 16484274
+TYPE              : user
+TAGS              : release-keys
 SECURITY PATCH    : 2026-10-05
-FIRST API LEVEL   : 31
+FIRST API LEVEL   : 32
 SPOOF PROVIDER    : false
 SPOOF VENDING SDK : false
 ```
