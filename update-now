@@ -11,7 +11,8 @@
 #   --no-fetch skip autopif.sh, use existing pif.json
 #   --no-rkp   don't use the RKP keybox: fall back to the AOSP test certs, and
 #              fetch only the bluejay (Pixel 6a) fingerprint
-#   --strong   shortcut: fetch a fresh keybox + use the --no-rkp path (overrides -k)
+#   --strong   fetch fresh keybox + bluejay fingerprint, embed that keybox in the
+#              APK (no AOSP certs); overrides -k and --no-rkp
 usage() {
     cat <<'EOF'
 Usage: ./update-now [-p] [-k] [--no-fetch] [--no-rkp] [--strong]
@@ -25,8 +26,8 @@ Options:
   --no-fetch  skip autopif.sh, use existing pif.json
   --no-rkp    don't use the RKP keybox: fall back to the AOSP test certs, and
               fetch only the bluejay (Pixel 6a) fingerprint
-  --strong    shortcut: fetch a fresh keybox + use the --no-rkp path
-              (bluejay fingerprint, AOSP test certs); overrides -k
+  --strong    fetch a fresh keybox + bluejay fingerprint and embed that
+              keybox in PIF.apk (no AOSP certs); overrides -k and --no-rkp
   -h, --help  show this help and exit
 EOF
 }
@@ -106,7 +107,10 @@ ARGS=(-j pif.json -u)
 if [ "$SPOOF" -eq 1 ]; then
     ARGS+=(-p)
 fi
-if [ "$NORKP" -eq 1 ]; then
+# --strong keeps the bluejay fingerprint from --no-rkp but must NOT pass -r:
+# -r forces the AOSP test certs, which is exactly what we're trying to replace
+# with the freshly fetched hardware keybox.
+if [ "$NORKP" -eq 1 ] && [ "$STRONG" -eq 0 ]; then
     ARGS+=(-r)
 fi
 OUTPUT=$(./"$SCRIPT_NAME" "${ARGS[@]}")

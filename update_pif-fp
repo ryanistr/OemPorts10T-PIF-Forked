@@ -7,8 +7,10 @@ FIRST_API_LEVEL=""
 OPT_API=""
 JSON_API=""
 NORKP=false
+KEYBOX_TYPE="ec_rsa"
 
 aosp_cert() {
+	KEYBOX_TYPE="ec_rsa"
 	EC_PRIV_KEY="-----BEGIN EC PRIVATE KEY-----
 MHcCAQEEICHghkMqFRmEWc82OlD8FMnarfk19SfC39ceTW28QuVEoAoGCCqGSM49
 AwEHoUQDQgAE6555+EJjWazLKpFMiYbMcK2QZpOCqXMmE/6sy/ghJ0whdJdKKv6l
@@ -389,11 +391,11 @@ SPOOF VENDING SDK : $SPOOF_VENDING_SDK
 keybox_xml=$(ls *.xml 2>/dev/null | head -n1)
 
 load_keybox() {
-	# $1 = keybox xml path. The ROM-side dex only accepts a keybox array of
-	# 6/8/10 entries laid out as EC(privkey + N certs) then RSA(privkey + N certs),
-	# and it reads the RSA half starting at index N+1. A keybox with only one
-	# algorithm (or mismatched chains) can never satisfy that, so it must fall
-	# back to the AOSP test certs instead of emitting an array the dex rejects.
+	# $1 = keybox xml path. The ROM-side dex reads @array/keybox according to
+	# @string/keybox_type: "ec_rsa" (EC priv + N certs, then RSA priv + N certs),
+	# "ec" (EC only), or "rsa" (RSA only). Evoker's live keyboxes are ECDSA-only
+	# with a hardware chain, so emit those as type "ec" instead of discarding
+	# them and falling back to the AOSP test certs.
 	local file=$1
 	local ec_keys rsa_keys ec_certs rsa_certs
 	ec_keys=$(xmllint --xpath "count(//Key[@algorithm='ecdsa'])" "$file" 2>/dev/null)
@@ -401,6 +403,23 @@ load_keybox() {
 	ec_certs=$(xmllint --xpath "count((//Key[@algorithm='ecdsa'])[1]/CertificateChain/Certificate)" "$file" 2>/dev/null)
 	rsa_certs=$(xmllint --xpath "count((//Key[@algorithm='rsa'])[1]/CertificateChain/Certificate)" "$file" 2>/dev/null)
 
+	# EC-only keybox (evoker /key): 1 EC key, no RSA key, 2-4 certs.
+	if [ "$ec_keys" = "1" ] && [ "$rsa_keys" = "0" ]; then
+		case "$ec_certs" in
+			2|3|4) ;;
+			*) echo "keybox: EC cert chain length $ec_certs not supported (need 2-4) - falling back to AOSP test certs"; return 1 ;;
+		esac
+		EC_PRIV_KEY=$(xmllint --xpath "//Key[@algorithm='ecdsa']/PrivateKey/text()" "$file")
+		eval "EC_CERT_1=\$(xmllint --xpath \"(//Key[@algorithm='ecdsa']/CertificateChain/Certificate)[1]/text()\" \"$file\" 2>/dev/null)"
+		eval "EC_CERT_2=\$(xmllint --xpath \"(//Key[@algorithm='ecdsa']/CertificateChain/Certificate)[2]/text()\" \"$file\" 2>/dev/null)"
+		eval "EC_CERT_3=\$(xmllint --xpath \"(//Key[@algorithm='ecdsa']/CertificateChain/Certificate)[3]/text()\" \"$file\" 2>/dev/null)"
+		eval "EC_CERT_4=\$(xmllint --xpath \"(//Key[@algorithm='ecdsa']/CertificateChain/Certificate)[4]/text()\" \"$file\" 2>/dev/null)"
+		KEYBOX_TYPE="ec"
+		KeyboxSize=$((1 + ec_certs))
+		return 0
+	fi
+
+	# Dual keybox: EC(priv + N certs) then RSA(priv + N certs), matched chains.
 	if [ "$ec_keys" != "1" ] || [ "$rsa_keys" != "1" ] || [ "$ec_certs" != "$rsa_certs" ]; then
 		echo "keybox: unusable layout (ecdsa keys=$ec_keys certs=$ec_certs, rsa keys=$rsa_keys certs=$rsa_certs) - falling back to AOSP test certs"
 		return 1
@@ -420,6 +439,7 @@ load_keybox() {
 	eval "RSA_CERT_2=\$(xmllint --xpath \"(//Key[@algorithm='rsa']/CertificateChain/Certificate)[2]/text()\" \"$file\")"
 	eval "RSA_CERT_3=\$(xmllint --xpath \"(//Key[@algorithm='rsa']/CertificateChain/Certificate)[3]/text()\" \"$file\")"
 	eval "RSA_CERT_4=\$(xmllint --xpath \"(//Key[@algorithm='rsa']/CertificateChain/Certificate)[4]/text()\" \"$file\")"
+	KEYBOX_TYPE="ec_rsa"
 	# 2 private keys + 2*N certs
 	KeyboxSize=$((2 + 2 * ec_certs))
 	return 0
@@ -491,6 +511,17 @@ if [[ -f PIF.apk ]]; then
     echo "        <item>null</item>" >> pif-apk/res/values/arrays.xml
     echo '    </string-array>' >> pif-apk/res/values/arrays.xml
 	case $KeyboxSize in
+	    "3"|"4"|"5" )
+	         # EC-only keybox: EC private key + certs, told to the ROM by
+	         # @string/keybox_type = "ec" (no RSA half to append).
+	         echo '    <string-array name="keybox">' >> pif-apk/res/values/arrays.xml
+	         echo "        <item>\"$EC_PRIV_KEY\"</item>" >> pif-apk/res/values/arrays.xml
+	         echo "        <item>\"$EC_CERT_1\"</item>" >> pif-apk/res/values/arrays.xml
+	         echo "        <item>\"$EC_CERT_2\"</item>" >> pif-apk/res/values/arrays.xml
+	         [ "$KeyboxSize" -ge 4 ] && echo "        <item>\"$EC_CERT_3\"</item>" >> pif-apk/res/values/arrays.xml
+	         [ "$KeyboxSize" -ge 5 ] && echo "        <item>\"$EC_CERT_4\"</item>" >> pif-apk/res/values/arrays.xml
+	         echo '    </string-array>' >> pif-apk/res/values/arrays.xml
+		;;
 	    "6" )
 	         echo '    <string-array name="keybox">' >> pif-apk/res/values/arrays.xml
 	         echo "        <item>\"$EC_PRIV_KEY\"</item>" >> pif-apk/res/values/arrays.xml
@@ -539,6 +570,7 @@ if [[ -f PIF.apk ]]; then
 	echo '<?xml version="1.0" encoding="utf-8"?>' > pif-apk/res/values/strings.xml
 	echo '<resources>' >> pif-apk/res/values/strings.xml
 	echo "    <string name=\"security_patch\">$SECURITY_PATCH</string>" >> pif-apk/res/values/strings.xml
+	echo "    <string name=\"keybox_type\">$KEYBOX_TYPE</string>" >> pif-apk/res/values/strings.xml
 	echo '</resources>' >> pif-apk/res/values/strings.xml
 
 	echo '<?xml version="1.0" encoding="utf-8"?>' > pif-apk/res/values/public.xml
@@ -550,6 +582,7 @@ if [[ -f PIF.apk ]]; then
     echo '<public type="bool" name="spoof_provider" />' >> pif-apk/res/values/public.xml
     echo '<public type="bool" name="spoof_vending_sdk" />' >> pif-apk/res/values/public.xml
     echo '<public type="string" name="security_patch" />' >> pif-apk/res/values/public.xml
+    echo '<public type="string" name="keybox_type" />' >> pif-apk/res/values/public.xml
 	echo '</resources>' >> pif-apk/res/values/public.xml
 
 	apktool b -o PIF-tmp.apk --no-crunch pif-apk -q

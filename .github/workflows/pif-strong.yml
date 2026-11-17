@@ -70,8 +70,9 @@ jobs:
           chmod +x update-now fetch-keybox-now.sh autopif.sh update_pif-fp
           ./update-now --strong
 
-      # Non-fatal: --strong uses AOSP test certs, so a dead keybox mirror does
-      # not block the fingerprint/APK update. It only means keybox.xml is stale.
+      # Non-fatal: a dead keybox mirror just leaves the previous keybox in
+      # place; update_pif-fp then falls back to AOSP test certs, but the
+      # fingerprint/APK update still completes.
       - name: Report keybox upstream health
         run: |
           if [ -s keybox.xml ]; then
