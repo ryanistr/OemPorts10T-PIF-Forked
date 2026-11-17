@@ -114,6 +114,9 @@ echo "$OUTPUT"
 
 {
     echo "# PIF Updater Info..."
+    echo ""
+    echo "Updated at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+    echo ""
     echo '```text'
     echo "$OUTPUT" | awk '/^MANUFACTURER/{flag=1} flag; /^SPOOF VENDING SDK/{flag=0}'
     echo '```'
