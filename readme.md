@@ -1,11 +1,11 @@
 # PIF Updater Info...
 ```text
 MANUFACTURER      : Google
-MODEL 	          : Pixel 10 Pro XL
-FINGERPRINT       : google/mustang_beta/mustang:CANARY/ZP11.261016.008/16754936:user/release-keys
+MODEL 	          : Pixel 6a
+FINGERPRINT       : google/bluejay_beta/bluejay:CANARY/ZP11.261016.008/16754936:user/release-keys
 BRAND             : google
-PRODUCT           : mustang_beta
-DEVICE            : mustang
+PRODUCT           : bluejay_beta
+DEVICE            : bluejay
 RELEASE           : CANARY
 ID                : ZP11.261016.008
 INCREMENTAL       : 16754936
