@@ -12,7 +12,7 @@ INCREMENTAL       : 16754936
 TYPE              : user
 TAGS              : release-keys
 SECURITY PATCH    : 2026-11-05
-FIRST API LEVEL   : 32
+FIRST API LEVEL   : 31
 SPOOF PROVIDER    : false
 SPOOF VENDING SDK : false
 ```
