@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# place update_pif-fp in the same directory as this script before running
+# place fetch-keybox-now.sh in the same directory as this script before running
+# place PIF.apk in the same directory as this script before running
+# by default a fresh keybox.xml is fetched into this directory first;
+# -k keeps the existing keybox.xml instead of fetching
+# usage: ./update-now [-p] [-k] [--no-fetch] [--no-rkp] [--strong]
+#   -p         enable spoof provider
+#   -k         keep existing keybox.xml in cwd (skip the keybox fetch)
+#   --no-fetch skip autopif.sh, use existing pif.json
+#   --no-rkp   don't use the RKP keybox: fall back to the AOSP test certs, and
+#              fetch only the bluejay (Pixel 6a) fingerprint
+#   --strong   shortcut: fetch a fresh keybox + use the --no-rkp path (overrides -k)
+usage() {
+    cat <<'EOF'
+Usage: ./update-now [-p] [-k] [--no-fetch] [--no-rkp] [--strong]
+
+Fetch a fresh keybox.xml, fetch a fingerprint, update PIF/keybox, and commit
+the readme.
+
+Options:
+  -p          enable spoof provider
+  -k          keep existing keybox.xml in cwd (skip the keybox fetch)
+  --no-fetch  skip autopif.sh, use existing pif.json
+  --no-rkp    don't use the RKP keybox: fall back to the AOSP test certs, and
+              fetch only the bluejay (Pixel 6a) fingerprint
+  --strong    shortcut: fetch a fresh keybox + use the --no-rkp path
+              (bluejay fingerprint, AOSP test certs); overrides -k
+  -h, --help  show this help and exit
+EOF
+}
+
+FETCH=1
+SPOOF=0
+NORKP=0
+KEEP=0
+STRONG=0
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help) usage; exit 0 ;;
+        --no-fetch) FETCH=0 ;;
+        --no-rkp) NORKP=1 ;;
+        -p) SPOOF=1 ;;
+        -k) KEEP=1 ;;
+        --strong) STRONG=1 ;;
+        *) echo "Unknown option: $arg" ; echo "Try '$(basename "$0") --help' for usage." ; exit 1 ;;
+    esac
+done
+
+# --strong is a shortcut for "fetch fresh keybox + take the --no-rkp path".
+# Applied after parsing so it wins over -k / --no-rkp regardless of flag order.
+if [ "$STRONG" -eq 1 ]; then
+    NORKP=1
+    KEEP=0
+fi
+
+# ---- Keybox ----
+# Default: fetch a live keybox.xml into the cwd before updating PIF.
+# -k: use whatever keybox.xml is already here. --strong forces a fetch.
+KB_SCRIPT="fetch-keybox-now.sh"
+if [ "$KEEP" -eq 1 ]; then
+    echo "Keeping existing keybox.xml in $(pwd)"
+    if [ ! -f "./keybox.xml" ]; then
+        echo "Warning: keybox.xml not found in $(pwd); update_pif-fp will fall back to AOSP test certs"
+    fi
+else
+    if [ ! -f "./$KB_SCRIPT" ]; then
+        echo "Error: $KB_SCRIPT not found in $(pwd)"
+        exit 1
+    fi
+    if [ ! -x "./$KB_SCRIPT" ]; then
+        chmod +x "./$KB_SCRIPT"
+    fi
+    echo "Fetching keybox.xml"
+    ./"$KB_SCRIPT"
+    kb_rc=$?
+    if [ "$kb_rc" -eq 1 ]; then
+        echo "Warning: keybox fetch failed; continuing with existing keybox.xml if present"
+    fi
+fi
+
+if [ "$FETCH" -eq 1 ]; then
+    echo "Fetching PIF.json"
+    if [ "$NORKP" -eq 1 ]; then
+        ./autopif.sh --bluejay
+    else
+        ./autopif.sh
+    fi
+fi
+echo "Updating PIF"
+SCRIPT_NAME="update_pif-fp"
+
+if [ ! -f "./$SCRIPT_NAME" ]; then
+    echo "Error: $SCRIPT_NAME not found in $(pwd)"
+    exit 1
+fi
+if [ ! -x "./$SCRIPT_NAME" ]; then
+    echo "Setting executable permissions on $SCRIPT_NAME..."
+    chmod +x "./$SCRIPT_NAME"
+fi
+
+# FIRST_API_LEVEL is taken from pif.json (it wins); -s is only a fallback for a
+# json that has no such key, so it is not passed here.
+ARGS=(-j pif.json -u)
+if [ "$SPOOF" -eq 1 ]; then
+    ARGS+=(-p)
+fi
+if [ "$NORKP" -eq 1 ]; then
+    ARGS+=(-r)
+fi
+OUTPUT=$(./"$SCRIPT_NAME" "${ARGS[@]}")
+echo "$OUTPUT"
+
+{
+    echo "# PIF Updater Info..."
+    echo '```text'
+    echo "$OUTPUT" | awk '/^MANUFACTURER/{flag=1} flag; /^SPOOF VENDING SDK/{flag=0}'
+    echo '```'
+} > readme.md
+
+git add readme.md >/dev/null 2>&1
+git commit -m "readme.md" >/dev/null 2>&1
+git push >/dev/null 2>&1
