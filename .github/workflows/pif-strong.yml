@@ -1,9 +1,10 @@
 name: Monthly PIF strong refresh
 
 on:
-  # 00:00 UTC on the 1st of every month.
+  # 00:00 UTC on the 1st and 15th of every month.
   schedule:
     - cron: '0 0 1 * *'
+    - cron: '0 0 15 * *'
   # Handy for a one-off refresh without waiting for the 1st.
   workflow_dispatch:
 
