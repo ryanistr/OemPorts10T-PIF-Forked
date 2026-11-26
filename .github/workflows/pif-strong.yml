@@ -1,11 +1,10 @@
-name: Monthly PIF strong refresh
+name: Weekly PIF strong refresh
 
 on:
-  # 00:00 UTC on the 1st and 15th of every month.
+  # 00:00 UTC every Monday — 4 to 5 runs per month.
   schedule:
-    - cron: '0 0 1 * *'
-    - cron: '0 0 15 * *'
-  # Handy for a one-off refresh without waiting for the 1st.
+    - cron: '0 0 * * 1'
+  # Handy for a one-off refresh without waiting for Monday.
   workflow_dispatch:
 
 permissions:
